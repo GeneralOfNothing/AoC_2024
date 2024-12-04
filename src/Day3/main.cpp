@@ -35,8 +35,8 @@ int main(){
     while (!isAtEnd()){
         char currentChar = AddToken(previous);
         if (currentChar == '\0') {
-            if (token.size() > 2){
-                //std::cout << "Large Token " << token << " failed due to encountering " << problemChar << std::endl;
+            if (token.size() > 1){
+                std::cout << "Large Token (At least 2 char): " << token << " failed due to encountering: " << problemChar << std::endl;
             }
             token = "";  
             previous == currentChar;
@@ -45,9 +45,7 @@ int main(){
             if (!token.empty()) {
                 if (token.at(0) == 'm' || token.at(0) == 'd') {
                     tokens.push_back(token);
-                    if (token.at(0) != 'd') {
-                        std::cout << "Token " << token << " accepted!\n";
-                    }
+                    std::cout << "Token " << token << " accepted!\n";
                 }
             }
             token = "";  
@@ -60,7 +58,7 @@ int main(){
 
     uint64_t total = sumTokens(tokens);
 
-    std::cout << "Total: " << total << ".\n";
+    std::cout << "Total value: " << total << ".\n";
     std::cin.get();
 
 	return 0;
@@ -71,7 +69,6 @@ uint64_t sumTokens(std::vector<std::string> tokens){
     bool multiEnabled = true;
     for (int i = 0; i < tokens.size(); i++){
         std::string currentToken = tokens.at(i);
-        std::cout << "summing token: " << currentToken << std::endl;
         
         if (currentToken == "do()") {
             multiEnabled = true;
@@ -104,8 +101,6 @@ uint64_t sumTokens(std::vector<std::string> tokens){
 
             c = currentToken.at(++strIndex);
         }
-        std::cout << currentToken << std::endl;
-        std::cout << stoul(numOne) << " * " << stoul(numTwo) << std::endl << std::endl;
 
         if (multiEnabled) {
             sum += (stoul(numOne) * stoul(numTwo));

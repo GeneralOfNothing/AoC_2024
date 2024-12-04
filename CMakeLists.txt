@@ -6,11 +6,12 @@ project(AoC_2024)
 add_executable(DayOne src/Day1/main.cpp)
 add_executable(DayTwo src/Day2/main.cpp)
 add_executable(DayThree src/Day3/main.cpp)
+add_executable(DayFour src/Day4/main.cpp)
 
 #Dummy Target
 add_custom_target(BuildAll)
 
-add_dependencies(BuildAll DayOne DayTwo DayThree)
+add_dependencies(BuildAll DayOne DayTwo DayThree DayFour)
 
 #Create a TestData dir in the build location
 add_custom_command(TARGET BuildAll
