@@ -1,5 +1,6 @@
 #ignore all files with extension:
 *.sh
+*.user
 
 #ignore all directories named:
 Build/
