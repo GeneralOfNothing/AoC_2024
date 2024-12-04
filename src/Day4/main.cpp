@@ -4,8 +4,8 @@
 #include<vector>
 
 std::vector<std::vector<char>> getInput(std::fstream& inFile);
-std::vector<std::string> collectTokensPartOne(std::vector<std::vector<char>>& input);
-std::vector<std::string> collectTokensPartTwo(std::vector<std::vector<char>>& input);
+std::vector<std::string> collectXMASTokens(std::vector<std::vector<char>>& input);
+std::vector<std::string> collectX_MASTokens(std::vector<std::vector<char>>& input);
 
 int main(){
     std::fstream inFile("TestData//input.txt");
@@ -16,8 +16,8 @@ int main(){
     std::vector<std::vector<char>> input = getInput(inFile);
 
 
-    //Input:
-
+    //Input Display:
+    std::cout << "Day Four's Input:\n";
     for (int i = 0; i < input.size(); i++){
         for (int j = 0; j < input.at(i).size(); j++){
             std::cout << input.at(i).at(j);
@@ -25,9 +25,8 @@ int main(){
         std::cout << std::endl;
     }
 
-
-    std::vector<std::string> tokens = collectTokensPartOne(input);
-    std::vector<std::string> masTokens = collectTokensPartTwo(input);
+    std::vector<std::string> tokens = collectXMASTokens(input);
+    std::vector<std::string> masTokens = collectX_MASTokens(input);
 
     std::cout << "Total Valid Part One Tokens: " << tokens.size() << std::endl;
     std::cout << "Total Valid Part Two Tokens: " << masTokens.size() << std::endl;
@@ -37,10 +36,8 @@ int main(){
     return 0;
 }
 
-std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input, int row, int col) {
+std::vector<std::string> parseXMASToken(std::vector<std::vector<char>>& input, int row, int col) {
     std::vector<std::string> tokens;
-
-    //std::cout << "Checking Letter at ROW: " << row << ", COL: " << col << std::endl;
 
     // If the letter is not 'X', return nothing.
     if (input.at(row).at(col) != 'X') {
@@ -56,7 +53,7 @@ std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input
                 tokens.push_back("XMAS");
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "TopLeft out of range: " << e.what() << std::endl;
+            //std::cerr << "TopLeft out of range: " << e.what() << std::endl;
         }
 
         // Top
@@ -67,7 +64,7 @@ std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input
                 tokens.push_back("XMAS");
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "Top out of range: " << e.what() << std::endl;
+            //std::cerr << "Top out of range: " << e.what() << std::endl;
         }
 
         // TopRight
@@ -78,7 +75,7 @@ std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input
                 tokens.push_back("XMAS");
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "TopRight out of range: " << e.what() << std::endl;
+            //std::cerr << "TopRight out of range: " << e.what() << std::endl;
         }
 
         // Left
@@ -89,7 +86,7 @@ std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input
                 tokens.push_back("XMAS");
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "Left out of range: " << e.what() << std::endl;
+            //std::cerr << "Left out of range: " << e.what() << std::endl;
         }
 
         // Right
@@ -100,7 +97,7 @@ std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input
                 tokens.push_back("XMAS");
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "Right out of range: " << e.what() << std::endl;
+            //std::cerr << "Right out of range: " << e.what() << std::endl;
         }
 
         // BottomLeft
@@ -111,7 +108,7 @@ std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input
                 tokens.push_back("XMAS");
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "BottomLeft out of range: " << e.what() << std::endl;
+            //std::cerr << "BottomLeft out of range: " << e.what() << std::endl;
         }
 
         // Bottom
@@ -122,7 +119,7 @@ std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input
                 tokens.push_back("XMAS");
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "Bottom out of range: " << e.what() << std::endl;
+            //std::cerr << "Bottom out of range: " << e.what() << std::endl;
         }
 
         // BottomRight
@@ -143,13 +140,11 @@ std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input
     return tokens;
 }
 
-std::string parseTokenPartTwo(std::vector<std::vector<char>>& input, int row, int col) {
-
-    //std::cout << "Checking Letter at ROW: " << row << ", COL: " << col << std::endl;
+std::string parseX_MASTokens(std::vector<std::vector<char>>& input, int row, int col) {
 
     // If the letter is not 'X', return nothing.
     if (input.at(row).at(col) != 'A') {
-        return "NOTA";
+        return "INVALIDTOKEN";
     }
 
     int validMASCount = 0;
@@ -162,7 +157,7 @@ std::string parseTokenPartTwo(std::vector<std::vector<char>>& input, int row, in
                 validMASCount++;
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "DiagDownForward out of range: " << e.what() << std::endl;
+            //std::cerr << "DiagDownForward out of range: " << e.what() << std::endl;
         }
 
         // DiagDownBackward
@@ -172,7 +167,7 @@ std::string parseTokenPartTwo(std::vector<std::vector<char>>& input, int row, in
                 validMASCount++;
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "DiagDownBackward out of range: " << e.what() << std::endl;
+            //std::cerr << "DiagDownBackward out of range: " << e.what() << std::endl;
         }
 
         // DiagUpForward
@@ -182,7 +177,7 @@ std::string parseTokenPartTwo(std::vector<std::vector<char>>& input, int row, in
                 validMASCount++;
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "DiagUpForward out of range: " << e.what() << std::endl;
+            //std::cerr << "DiagUpForward out of range: " << e.what() << std::endl;
         }
 
         // DiagUpBackward
@@ -192,7 +187,7 @@ std::string parseTokenPartTwo(std::vector<std::vector<char>>& input, int row, in
                 validMASCount++;
             }
         } catch (std::out_of_range& e) {
-            std::cerr << "DiagUpBackward out of range: " << e.what() << std::endl;
+            //std::cerr << "DiagUpBackward out of range: " << e.what() << std::endl;
         }
 
 
@@ -208,57 +203,43 @@ std::string parseTokenPartTwo(std::vector<std::vector<char>>& input, int row, in
     return "INVALIDTOKEN";
 }
 
-std::vector<std::string> collectTokensPartOne(std::vector<std::vector<char>>& input){
+std::vector<std::string> collectXMASTokens(std::vector<std::vector<char>>& input){
     std::vector<std::vector<std::string>> rawTokens;
 
     for (int i = 0; i < input.size(); i++){
         for (int j = 0; j < input.at(i).size(); j++){
-            rawTokens.push_back(parseTokenPartOne(input, i, j));
+            rawTokens.push_back(parseXMASToken(input, i, j));
         }
     }
 
     std::vector<std::string> cookedTokens;
-
-    int oorTokens = 0;
 
     for (int i = 0; i < rawTokens.size(); i++){
         for (int j = 0; j < rawTokens.at(i).size(); j++){
             if (rawTokens.at(i).at(j) == "XMAS"){
                 cookedTokens.push_back(rawTokens.at(i).at(j));
             }
-            else if (rawTokens.at(i).at(j) == "OOR"){
-                oorTokens++;
-                continue;
-            }
         }
     }
-    //std::cout << "Out of range tokens total: " << oorTokens << std::endl;
     return cookedTokens;
 }
 
-std::vector<std::string> collectTokensPartTwo(std::vector<std::vector<char>>& input){
+std::vector<std::string> collectX_MASTokens(std::vector<std::vector<char>>& input){
     std::vector<std::string> rawTokens;
 
     for (int i = 0; i < input.size(); i++){
         for (int j = 0; j < input.at(i).size(); j++){
-            rawTokens.push_back(parseTokenPartTwo(input, i, j));
+            rawTokens.push_back(parseX_MASTokens(input, i, j));
         }
     }
 
     std::vector<std::string> cookedTokens;
 
-    int oorTokens = 0;
-
     for (int i = 0; i < rawTokens.size(); i++){
         if (rawTokens.at(i) == "MAS"){
             cookedTokens.push_back(rawTokens.at(i));
         }
-        else if (rawTokens.at(i) == "OOR"){
-            oorTokens++;
-            continue;
-        }
     }
-    //std::cout << "Out of range tokens total: " << oorTokens << std::endl;
     return cookedTokens;
 }
 
