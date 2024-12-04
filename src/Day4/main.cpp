@@ -4,6 +4,8 @@
 #include<vector>
 
 std::vector<std::vector<char>> getInput(std::fstream& inFile);
+std::vector<std::string> collectTokensPartOne(std::vector<std::vector<char>>& input);
+std::vector<std::string> collectTokensPartTwo(std::vector<std::vector<char>>& input);
 
 int main(){
     std::fstream inFile("TestData//input.txt");
@@ -13,6 +15,9 @@ int main(){
 
     std::vector<std::vector<char>> input = getInput(inFile);
 
+
+    //Input:
+
     for (int i = 0; i < input.size(); i++){
         for (int j = 0; j < input.at(i).size(); j++){
             std::cout << input.at(i).at(j);
@@ -20,9 +25,241 @@ int main(){
         std::cout << std::endl;
     }
 
+
+    std::vector<std::string> tokens = collectTokensPartOne(input);
+    std::vector<std::string> masTokens = collectTokensPartTwo(input);
+
+    std::cout << "Total Valid Part One Tokens: " << tokens.size() << std::endl;
+    std::cout << "Total Valid Part Two Tokens: " << masTokens.size() << std::endl;
+
     std::cin.get();
 
     return 0;
+}
+
+std::vector<std::string> parseTokenPartOne(std::vector<std::vector<char>>& input, int row, int col) {
+    std::vector<std::string> tokens;
+
+    //std::cout << "Checking Letter at ROW: " << row << ", COL: " << col << std::endl;
+
+    // If the letter is not 'X', return nothing.
+    if (input.at(row).at(col) != 'X') {
+        return tokens;
+    }
+
+    try {
+        // TopLeft
+        try {
+            if (input.at(row - 1).at(col - 1) == 'M' &&
+                input.at(row - 2).at(col - 2) == 'A' &&
+                input.at(row - 3).at(col - 3) == 'S') {
+                tokens.push_back("XMAS");
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "TopLeft out of range: " << e.what() << std::endl;
+        }
+
+        // Top
+        try {
+            if (input.at(row - 1).at(col) == 'M' &&
+                input.at(row - 2).at(col) == 'A' &&
+                input.at(row - 3).at(col) == 'S') {
+                tokens.push_back("XMAS");
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "Top out of range: " << e.what() << std::endl;
+        }
+
+        // TopRight
+        try {
+            if (input.at(row - 1).at(col + 1) == 'M' &&
+                input.at(row - 2).at(col + 2) == 'A' &&
+                input.at(row - 3).at(col + 3) == 'S') {
+                tokens.push_back("XMAS");
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "TopRight out of range: " << e.what() << std::endl;
+        }
+
+        // Left
+        try {
+            if (input.at(row).at(col - 1) == 'M' &&
+                input.at(row).at(col - 2) == 'A' &&
+                input.at(row).at(col - 3) == 'S') {
+                tokens.push_back("XMAS");
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "Left out of range: " << e.what() << std::endl;
+        }
+
+        // Right
+        try {
+            if (input.at(row).at(col + 1) == 'M' &&
+                input.at(row).at(col + 2) == 'A' &&
+                input.at(row).at(col + 3) == 'S') {
+                tokens.push_back("XMAS");
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "Right out of range: " << e.what() << std::endl;
+        }
+
+        // BottomLeft
+        try {
+            if (input.at(row + 1).at(col - 1) == 'M' &&
+                input.at(row + 2).at(col - 2) == 'A' &&
+                input.at(row + 3).at(col - 3) == 'S') {
+                tokens.push_back("XMAS");
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "BottomLeft out of range: " << e.what() << std::endl;
+        }
+
+        // Bottom
+        try {
+            if (input.at(row + 1).at(col) == 'M' &&
+                input.at(row + 2).at(col) == 'A' &&
+                input.at(row + 3).at(col) == 'S') {
+                tokens.push_back("XMAS");
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "Bottom out of range: " << e.what() << std::endl;
+        }
+
+        // BottomRight
+        try {
+            if (input.at(row + 1).at(col + 1) == 'M' &&
+                input.at(row + 2).at(col + 2) == 'A' &&
+                input.at(row + 3).at(col + 3) == 'S') {
+                tokens.push_back("XMAS");
+            }
+        } catch (std::out_of_range& e) {
+            //std::cerr << "BottomRight out of range: " << e.what() << std::endl;
+        }
+    } catch (std::out_of_range& e) {
+        // This shouldn't be hit if all individual try-catch blocks are used.
+        std::cerr << "General out of range error: " << e.what() << std::endl;
+    }
+
+    return tokens;
+}
+
+std::string parseTokenPartTwo(std::vector<std::vector<char>>& input, int row, int col) {
+
+    //std::cout << "Checking Letter at ROW: " << row << ", COL: " << col << std::endl;
+
+    // If the letter is not 'X', return nothing.
+    if (input.at(row).at(col) != 'A') {
+        return "NOTA";
+    }
+
+    int validMASCount = 0;
+
+    try {
+        //DiagDownForward
+        try {
+            if (input.at(row - 1).at(col - 1) == 'M' &&
+                input.at(row + 1).at(col + 1) == 'S') {
+                validMASCount++;
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "DiagDownForward out of range: " << e.what() << std::endl;
+        }
+
+        // DiagDownBackward
+        try {
+            if (input.at(row - 1).at(col + 1) == 'M' &&
+                input.at(row + 1).at(col - 1) == 'S') {
+                validMASCount++;
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "DiagDownBackward out of range: " << e.what() << std::endl;
+        }
+
+        // DiagUpForward
+        try {
+            if (input.at(row + 1).at(col - 1) == 'M' &&
+                input.at(row - 1).at(col + 1) == 'S') {
+                validMASCount++;
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "DiagUpForward out of range: " << e.what() << std::endl;
+        }
+
+        // DiagUpBackward
+        try {
+            if (input.at(row + 1).at(col + 1) == 'M' &&
+                input.at(row - 1).at(col - 1) == 'S') {
+                validMASCount++;
+            }
+        } catch (std::out_of_range& e) {
+            std::cerr << "DiagUpBackward out of range: " << e.what() << std::endl;
+        }
+
+
+    } catch (std::out_of_range& e) {
+        // This shouldn't be hit if all individual try-catch blocks are used.
+        std::cerr << "General out of range error: " << e.what() << std::endl;
+    }
+
+    if (validMASCount >= 2){
+        return "MAS";
+    }
+
+    return "INVALIDTOKEN";
+}
+
+std::vector<std::string> collectTokensPartOne(std::vector<std::vector<char>>& input){
+    std::vector<std::vector<std::string>> rawTokens;
+
+    for (int i = 0; i < input.size(); i++){
+        for (int j = 0; j < input.at(i).size(); j++){
+            rawTokens.push_back(parseTokenPartOne(input, i, j));
+        }
+    }
+
+    std::vector<std::string> cookedTokens;
+
+    int oorTokens = 0;
+
+    for (int i = 0; i < rawTokens.size(); i++){
+        for (int j = 0; j < rawTokens.at(i).size(); j++){
+            if (rawTokens.at(i).at(j) == "XMAS"){
+                cookedTokens.push_back(rawTokens.at(i).at(j));
+            }
+            else if (rawTokens.at(i).at(j) == "OOR"){
+                oorTokens++;
+                continue;
+            }
+        }
+    }
+    //std::cout << "Out of range tokens total: " << oorTokens << std::endl;
+    return cookedTokens;
+}
+
+std::vector<std::string> collectTokensPartTwo(std::vector<std::vector<char>>& input){
+    std::vector<std::string> rawTokens;
+
+    for (int i = 0; i < input.size(); i++){
+        for (int j = 0; j < input.at(i).size(); j++){
+            rawTokens.push_back(parseTokenPartTwo(input, i, j));
+        }
+    }
+
+    std::vector<std::string> cookedTokens;
+
+    int oorTokens = 0;
+
+    for (int i = 0; i < rawTokens.size(); i++){
+        if (rawTokens.at(i) == "MAS"){
+            cookedTokens.push_back(rawTokens.at(i));
+        }
+        else if (rawTokens.at(i) == "OOR"){
+            oorTokens++;
+            continue;
+        }
+    }
+    //std::cout << "Out of range tokens total: " << oorTokens << std::endl;
+    return cookedTokens;
 }
 
 std::vector<std::vector<char>> getInput(std::fstream& inFile){
