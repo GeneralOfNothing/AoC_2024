@@ -2,16 +2,18 @@
 #include<fstream>
 #include<string>
 #include<vector>
+#include<cstdint>
 
 int current = 0;
 char problemChar = '\0';
 std::string input;
-std::string output;
 
 char Advance();
 char AddToken(char previous);
 bool isAtEnd();
-uint sumTokens(std::vector<std::string> tokens);
+char Peek();
+
+uint64_t sumTokens(std::vector<std::string> tokens);
 
 int main(){
 
@@ -33,38 +35,53 @@ int main(){
     while (!isAtEnd()){
         char currentChar = AddToken(previous);
         if (currentChar == '\0') {
-            if (token.size() > 0){
-                if (token.at(0) == 'm'){
-                    std::cout << "M Token " << token << " failed due to encountering " << problemChar << std::endl;
-                }
+            if (token.size() > 2){
+                //std::cout << "Large Token " << token << " failed due to encountering " << problemChar << std::endl;
             }
-            token = "";  // Reset token if AddToken fails.
+            token = "";  
             previous == currentChar;
         } else if (currentChar == '.') {
-            token += ')';  // Complete the token.
-            if (!token.empty() && token.at(0) == 'm') {
-                tokens.push_back(token);
-                std::cout << "Token " << token << " accepted!\n";
+            token += ')';
+            if (!token.empty()) {
+                if (token.at(0) == 'm' || token.at(0) == 'd') {
+                    tokens.push_back(token);
+                    if (token.at(0) != 'd') {
+                        std::cout << "Token " << token << " accepted!\n";
+                    }
+                }
             }
-            token = "";  // Reset for the next token.
+            token = "";  
         } else {
-            token += currentChar;  // Add valid character to the token.
-            previous = currentChar;  // Update previous only for valid characters.
+            token += currentChar;  
+            previous = currentChar;  
         }
     }
     std::cout << tokens.size() << " total tokens.\n";
 
-    uint total = sumTokens(tokens);
+    uint64_t total = sumTokens(tokens);
 
     std::cout << "Total: " << total << ".\n";
+    std::cin.get();
 
 	return 0;
 }
 
-uint sumTokens(std::vector<std::string> tokens){
-    uint sum = 0;
+uint64_t sumTokens(std::vector<std::string> tokens){
+    uint64_t sum = 0;
+    bool multiEnabled = true;
     for (int i = 0; i < tokens.size(); i++){
         std::string currentToken = tokens.at(i);
+        std::cout << "summing token: " << currentToken << std::endl;
+        
+        if (currentToken == "do()") {
+            multiEnabled = true;
+            continue;
+        }
+        if (currentToken == "don't()") {
+            multiEnabled = false;
+            continue;
+        }
+
         std::string numOne;
         std::string numTwo;
 
@@ -89,7 +106,10 @@ uint sumTokens(std::vector<std::string> tokens){
         }
         std::cout << currentToken << std::endl;
         std::cout << stoul(numOne) << " * " << stoul(numTwo) << std::endl << std::endl;
-        sum += (stoul(numOne) * stoul(numTwo));
+
+        if (multiEnabled) {
+            sum += (stoul(numOne) * stoul(numTwo));
+        }
     }
 
     return sum;
@@ -99,31 +119,51 @@ bool isAtEnd(){
     return current >= input.size();
 }
 
-//Return the current char and advance the current.
 char Advance(){
     return input.at(current++);
+}
+
+//Pretty much the same as advance expect we do not consume the character.
+char Peek() {
+    return input.at(current);
 }
 
 char AddToken(char previous) {
     char c = Advance();  // Fetch the current character.
 
     switch (c) {
+        //Part Two:
+    case 'd':
+        return c;
+    case 'o':
+        if (previous == 'd') return c;
+        break;
+    case 'n':
+        if (previous == 'o') return c;
+        break;
+    case '\'':
+        if (previous == 'n') return c;
+        break;
+    case 't':
+        if (previous == '\'') return c;
+        break;
+        //Part One:
     case 'm':
         return c;
     case 'u':
         if (previous == 'm') return c;
-        break;  // Invalid state: Break instead of returning immediately.
+        break;
     case 'l':
         if (previous == 'u') return c;
         break;
     case '(':
-        if (previous == 'l') return c;
+        if (previous == 'l' || previous == 'o' || previous == 't') return c;
         break;
     case ')':
-        if (isdigit(previous)) return '.';
+        if (isdigit(previous) || previous == '(') return '.';
         break;
     case ',':
-        if (isdigit(previous)) return c;
+        if (isdigit(previous) && isdigit(Peek())) return c;
         break;
     default:
         if (isdigit(c)) {
