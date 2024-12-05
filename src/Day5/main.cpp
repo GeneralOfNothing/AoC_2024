@@ -5,11 +5,11 @@
 #include<map>
 #include<algorithm>
 
-std::multimap<std::string, std::string> populateRuleMap(std::vector<std::string> rules);
-int countValidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates);
+std::map<int, std::vector<int>> populateRuleMap(std::vector<std::string> rules);
+int countValidUpdates(std::map<int, std::vector<int>>& ruleMap, std::vector<std::string>& updates);
 std::vector<std::string> parseUpdate(std::string update);
-int countInvalidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates);
-std::vector<std::string> getInvalidNumbersForKey(std::multimap<std::string, std::string>& ruleMap, std::string key);
+int countInvalidUpdates(std::map<int, std::vector<int>>& ruleMap, std::vector<std::string>& updates);
+std::vector<int> getInvalidNumbersForKey(std::map<int, std::vector<int>>& ruleMap, std::string key);
 
 int main(){
     std::ifstream inFile("TestData/05_input.txt");
@@ -30,54 +30,19 @@ int main(){
         }
     }
 
-    /*
-    for (int i = 0; i < rules.size(); i++){
-        std::cout << rules.at(i) << std::endl;
-    }
-
-
-    for (int i = 0; i < updates.size(); i++){
-        std::cout << updates.at(i) << std::endl;
-    }
-    */
-
-    std::multimap<std::string, std::string> ruleMap = populateRuleMap(rules);
-
-    std::cout << "# of Updates: " << updates.size() << std::endl;
+    std::map<int, std::vector<int>> ruleMap = populateRuleMap(rules);
 
     int validUpdates = countValidUpdates(ruleMap, updates);
 
-    std::cout << "# of Updates: " << updates.size() << std::endl;
-
-    std::cout << "Valid Updates: " << validUpdates << std::endl;
-
-    //Remaining bad updates are in updates.
-    //TODO: Part 2 is to fix the updates and return the midpoint sum again.
-    std::cout << "Bad Updates: \n";
-    for (int i = 0; i < updates.size(); i++){
-        std::cout << updates.at(i) << std::endl;
-    }
+    std::cout << "Part One Valid Updates Sum: " << validUpdates << std::endl;
 
     int fixedBadUpdates = countInvalidUpdates(ruleMap, updates);
 
-    std::cout << "# of Updates: " << updates.size() << std::endl;
-
-    std::cout << "Fixed Bad Updates: " << fixedBadUpdates << std::endl;
-
-    std::cout << "Bad Updates: \n";
-    for (int i = 0; i < updates.size(); i++){
-        std::cout << updates.at(i) << std::endl;
-    }
+    std::cout << "Part Two Fixed Bad Updates Sum: " << fixedBadUpdates << std::endl;
 
     return 0;
 }
 
-/*
- * parseUpdate
- * SUMMARY : Splits an update from one string into a vector of strings containing each digit.
- * RETURNS : vector<string> containing each number of the update.
- * PARAM : string containing a single update (eg: "56, 20, 13, 40, 50")
- */
 std::vector<std::string> parseUpdate(std::string update){
     char c = '\0';
     std::string number = "";
@@ -97,25 +62,11 @@ std::vector<std::string> parseUpdate(std::string update){
     return nums;
 }
 
-/*
- * getInvalidNumbersForKey
- * SUMMARY : Looks up all of the numbers that must *NOT* be before key value.
- * RETURNS : vector<string> containing all invalid values.
- * PARAM : multimap<string,string>& containing the ruleset.
- * PARAM : string containing the key to lookup.
- */
-std::vector<std::string> getInvalidNumbersForKey(std::multimap<std::string, std::string>& ruleMap, std::string key){
-    std::vector<std::string> invalidNums;
-
-    auto range = ruleMap.equal_range(key);
-    for (auto it = range.first; it != range.second; it++){
-        invalidNums.push_back(it->second);
-    }
-
-    return invalidNums;
+std::vector<int> getInvalidNumbersForKey(std::map<int, std::vector<int>>& ruleMap, std::string key){
+    return ruleMap[std::stoi(key)];
 }
 
-int countInvalidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates){
+int countInvalidUpdates(std::map<int, std::vector<int>>& ruleMap, std::vector<std::string>& updates){
     int sum = 0;
     int numOfSwaps = 0;
     for (int i = 0; i < updates.size(); i++){
@@ -128,12 +79,12 @@ int countInvalidUpdates(std::multimap<std::string, std::string>& ruleMap, std::v
             for (int j = update.size() - 1; j >= 0; j--){
                 //Get the invalid numbers for this value.
                 std::string key = update.at(j);
-                std::vector<std::string> invalidNums = getInvalidNumbersForKey(ruleMap, key);
+                std::vector<int> invalidNums = getInvalidNumbersForKey(ruleMap, key);
 
                 //check all nums in front of j to see if it contains an invalid value.
                 for (int k = j - 1; k >= 0; k--) {
-                    std::string candidate = update.at(k);
-                    std::string invalidNum = "";
+                    int candidate = stoi(update.at(k));
+                    int invalidNum = 0;
 
                     // Check if the candidate contains any of the bad numbers
                     for (int m = 0; m < invalidNums.size(); m++) {
@@ -164,7 +115,7 @@ int countInvalidUpdates(std::multimap<std::string, std::string>& ruleMap, std::v
     return sum;
 }
 
-int countValidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates){
+int countValidUpdates(std::map<int, std::vector<int>>& ruleMap, std::vector<std::string>& updates){
     int sum = 0;
     for (int i = 0; i < updates.size(); i++){
         std::vector<std::string> update = parseUpdate(updates.at(i));
@@ -173,12 +124,12 @@ int countValidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vec
 
         for (int j = update.size() - 1; j >= 0; j--){
             std::string key = update.at(j);
-            std::vector<std::string> invalidNums = getInvalidNumbersForKey(ruleMap, key);
+            std::vector<int> invalidNums = getInvalidNumbersForKey(ruleMap, key);
 
             //check all nums in front of j to see if it contains a invalidNum.
             for (int k = j - 1; k >= 0; k--) { // Look at elements *in front* of j
-                std::string candidate = update.at(k);
-                std::string invalidNum = "";
+                int candidate = stoi(update.at(k));
+                int invalidNum = 0;
 
                 // Check if the candidate contains any of the invalid numbers
                 for (int m = 0; m < invalidNums.size(); m++) {
@@ -206,8 +157,8 @@ int countValidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vec
     return sum;
 }
 
-std::multimap<std::string, std::string> populateRuleMap(std::vector<std::string> rules){
-    std::multimap<std::string, std::string> map;
+std::map<int, std::vector<int>> populateRuleMap(std::vector<std::string> rules){
+    std::map<int, std::vector<int>> map;
     for (int i = 0; i < rules.size(); i++){
         bool pipeEncountered = false;
         std::string left;
@@ -225,9 +176,7 @@ std::multimap<std::string, std::string> populateRuleMap(std::vector<std::string>
                 right += c;
             }
         }
-        //std::cout << "Attempting to emplace: " << left << " | " << right << std::endl;
-        map.emplace(left, right);
-        //std::cout << "Success!" << std::endl;
+        map[std::stoi(left)].push_back(std::stoi(right));
     }
     return map;
 }
