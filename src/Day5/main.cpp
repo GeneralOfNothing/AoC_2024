@@ -8,7 +8,8 @@
 std::multimap<std::string, std::string> populateRuleMap(std::vector<std::string> rules);
 int countValidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates);
 std::vector<std::string> parseUpdate(std::string update);
-int fixBadUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates);
+int countInvalidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates);
+std::vector<std::string> getInvalidNumbersForKey(std::multimap<std::string, std::string>& ruleMap, std::string key);
 
 int main(){
     std::ifstream inFile("TestData/05_input.txt");
@@ -57,7 +58,7 @@ int main(){
         std::cout << updates.at(i) << std::endl;
     }
 
-    int fixedBadUpdates = fixBadUpdates(ruleMap, updates);
+    int fixedBadUpdates = countInvalidUpdates(ruleMap, updates);
 
     std::cout << "# of Updates: " << updates.size() << std::endl;
 
@@ -71,6 +72,12 @@ int main(){
     return 0;
 }
 
+/*
+ * parseUpdate
+ * SUMMARY : Splits an update from one string into a vector of strings containing each digit.
+ * RETURNS : vector<string> containing each number of the update.
+ * PARAM : string containing a single update (eg: "56, 20, 13, 40, 50")
+ */
 std::vector<std::string> parseUpdate(std::string update){
     char c = '\0';
     std::string number = "";
@@ -90,49 +97,60 @@ std::vector<std::string> parseUpdate(std::string update){
     return nums;
 }
 
-int fixBadUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates){
+/*
+ * getInvalidNumbersForKey
+ * SUMMARY : Looks up all of the numbers that must *NOT* be before key value.
+ * RETURNS : vector<string> containing all invalid values.
+ * PARAM : multimap<string,string>& containing the ruleset.
+ * PARAM : string containing the key to lookup.
+ */
+std::vector<std::string> getInvalidNumbersForKey(std::multimap<std::string, std::string>& ruleMap, std::string key){
+    std::vector<std::string> invalidNums;
+
+    auto range = ruleMap.equal_range(key);
+    for (auto it = range.first; it != range.second; it++){
+        invalidNums.push_back(it->second);
+    }
+
+    return invalidNums;
+}
+
+int countInvalidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates){
     int sum = 0;
+    int numOfSwaps = 0;
     for (int i = 0; i < updates.size(); i++){
         std::vector<std::string> update = parseUpdate(updates.at(i));
 
-        bool badNumFound = true;
+        bool invalidNumFound = true;
 
-        while (badNumFound){
-            badNumFound = false;
+        while (invalidNumFound){
+            invalidNumFound = false;
             for (int j = update.size() - 1; j >= 0; j--){
+                //Get the invalid numbers for this value.
                 std::string key = update.at(j);
-                auto range = ruleMap.equal_range(key);
-                std::vector<std::string> badNums;
+                std::vector<std::string> invalidNums = getInvalidNumbersForKey(ruleMap, key);
 
-                //
-                for (auto it = range.first; it != range.second; ++it) {
-                    badNums.push_back(it->second);
-                }
-
-                //check all nums in front of j to see if it contains a badnum.
-                for (int k = j - 1; k >= 0; k--) { // Look at elements *in front* of j
+                //check all nums in front of j to see if it contains an invalid value.
+                for (int k = j - 1; k >= 0; k--) {
                     std::string candidate = update.at(k);
-                    std::string problemNum = "";
+                    std::string invalidNum = "";
 
                     // Check if the candidate contains any of the bad numbers
-                    for (int m = 0; m < badNums.size(); m++) {
-                        if (candidate == (badNums.at(m))) {
-                            badNumFound = true;
-                            problemNum = candidate;
+                    for (int m = 0; m < invalidNums.size(); m++) {
+                        if (candidate == (invalidNums.at(m))) {
+                            invalidNumFound = true;
+                            invalidNum = candidate;
+
                             //Swap them.
-                            iter_swap(update.begin() + k, update.begin() + j);
+                            std::swap(update[k], update[j]);
+                            numOfSwaps++;
+
                             break;
                         }
                     }
                 }
             }
-            if (!badNumFound){
-                std::cout << "Fixed update!" << std::endl;
-                std::cout << updates.at(i) << std::endl << " to " << std::endl;
-                for (int i = 0; i < update.size(); i++){
-                    std::cout << update.at(i) << " ";
-                }
-                std::cout << std::endl;
+            if (!invalidNumFound){
                 int midpoint = update.size() / 2;
                 sum += stoi(update.at(midpoint));
 
@@ -142,55 +160,41 @@ int fixBadUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<
             }
         }
     }
+    std::cout << "NUMBER OF SWAPS TO FIX ALL UPDATES: " << numOfSwaps << std::endl;
     return sum;
 }
 
 int countValidUpdates(std::multimap<std::string, std::string>& ruleMap, std::vector<std::string>& updates){
     int sum = 0;
     for (int i = 0; i < updates.size(); i++){
-        //std::cout << "Attempting to check update " << updates.at(i) << std::endl;
         std::vector<std::string> update = parseUpdate(updates.at(i));
 
-        bool badNumFound = false;
+        bool invalidNumFound = false;
 
         for (int j = update.size() - 1; j >= 0; j--){
             std::string key = update.at(j);
-            auto range = ruleMap.equal_range(key);
-            std::vector<std::string> badNums;
+            std::vector<std::string> invalidNums = getInvalidNumbersForKey(ruleMap, key);
 
-            //
-            for (auto it = range.first; it != range.second; ++it) {
-                badNums.push_back(it->second);
-            }
-
-            //check all nums in front of j to see if it contains a badnum.
+            //check all nums in front of j to see if it contains a invalidNum.
             for (int k = j - 1; k >= 0; k--) { // Look at elements *in front* of j
                 std::string candidate = update.at(k);
-                std::string problemNum = "";
+                std::string invalidNum = "";
 
-                // Check if the candidate contains any of the bad numbers
-                for (int m = 0; m < badNums.size(); m++) {
-                    if (candidate == (badNums.at(m))) {
-                        problemNum = candidate;
-                        badNumFound = true;
+                // Check if the candidate contains any of the invalid numbers
+                for (int m = 0; m < invalidNums.size(); m++) {
+                    if (candidate == (invalidNums.at(m))) {
+                        invalidNum = candidate;
+                        invalidNumFound = true;
                         break;
                     }
                 }
 
-                if (badNumFound) {
-                    std::cout << "Update Rejected:\n";
-                    for (int b = 0; b < update.size(); b++){
-                        std::cout << update.at(b) << " ";
-                    }
-                    std::cout << std::endl;
-                    std::cout << "Due to " << problemNum << " being in front of " << update.at(j);
-                    std::cout << std::endl;
+                if (invalidNumFound) {
                     break; // No need to check further once a bad number is found
                 }
             }
         }
-        if (!badNumFound){
-            //std::cout << "Update " << updates.at(i) << " accepted!\n";
+        if (!invalidNumFound){
             int midpoint = update.size() / 2;
             sum += stoi(update.at(midpoint));
 
