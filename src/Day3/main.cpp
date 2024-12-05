@@ -4,56 +4,76 @@
 #include<vector>
 #include<cstdint>
 
-int current = 0;
-char problemChar = '\0';
-std::string input;
+//Excuse the laziness.. Globals prefixed with g_ at least.
+int g_current = 0;
+char g_problemChar = '\0';
+std::string g_input;
 
 char Advance();
-char AddToken(char previous);
+char ReturnValidChar(char previous);
 bool isAtEnd();
 char Peek();
-
+bool validateToken(std::string token);
 uint64_t sumTokens(std::vector<std::string> tokens);
 
 int main(){
 
-    std::ifstream inFile("TestData//input.txt");
+    std::ifstream inFile("TestData//03_input.txt");
 
     if (!inFile.is_open()){
-            std::cout << "Error: Unable to open input file.\n";
+            std::cerr << "Error: Unable to open input file.\n";
         }
 
     std::string buffer = "";
     while (getline(inFile, buffer)){
-        input += buffer;
+        g_input += buffer;
     }
 
     std::vector<std::string> tokens;
+    int partOneTokens = 0;
+    int partTwoTokens = 0;
 
     std::string token = "";
     char previous = '\0';
     while (!isAtEnd()){
-        char currentChar = AddToken(previous);
+        char currentChar = ReturnValidChar(previous);
+
+        //Discard if null
         if (currentChar == '\0') {
             if (token.size() > 1){
-                std::cout << "Large Token (At least 2 char): " << token << " failed due to encountering: " << problemChar << std::endl;
+                std::cout << "Large Token (At least 2 char): " << token << " failed due to encountering: " << g_problemChar << std::endl;
             }
             token = "";  
             previous == currentChar;
-        } else if (currentChar == '.') {
-            token += ')';
-            if (!token.empty()) {
-                if (token.at(0) == 'm' || token.at(0) == 'd') {
-                    tokens.push_back(token);
-                    std::cout << "Token " << token << " accepted!\n";
+        }
+        //A ')' indicates a completed token
+        else if (currentChar == ')') {
+            token += currentChar;
+            //We need additional validation here to ensure this is a well formed token.
+            bool isValid = validateToken(token);
+            if (isValid){
+                tokens.push_back(token);
+                std::cout << "Token " << token << " accepted!\n";
+
+                switch(token.at(0)){
+                case 'm':
+                    partOneTokens++;
+                    break;
+                case 'd':
+                    partTwoTokens++;
+                    break;
                 }
             }
             token = "";  
-        } else {
+        }
+        //We are still in the middle of consuming a possible token.
+        else {
             token += currentChar;  
             previous = currentChar;  
         }
     }
+    std::cout << partOneTokens << " total Part One tokens (mul(X,Y)).\n";
+    std::cout << partTwoTokens << " total Part Two tokens (do() or don't()).\n";
     std::cout << tokens.size() << " total tokens.\n";
 
     uint64_t total = sumTokens(tokens);
@@ -111,23 +131,23 @@ uint64_t sumTokens(std::vector<std::string> tokens){
 }
 
 bool isAtEnd(){
-    return current >= input.size();
+    return g_current >= g_input.size();
 }
 
 char Advance(){
-    return input.at(current++);
+    return g_input.at(g_current++);
 }
 
 //Pretty much the same as advance expect we do not consume the character.
 char Peek() {
-    return input.at(current);
+    return g_input.at(g_current);
 }
 
-char AddToken(char previous) {
+char ReturnValidChar(char previous) {
     char c = Advance();  // Fetch the current character.
 
     switch (c) {
-        //Part Two:
+//Part Two:
     case 'd':
         return c;
     case 'o':
@@ -142,7 +162,7 @@ char AddToken(char previous) {
     case 't':
         if (previous == '\'') return c;
         break;
-        //Part One:
+//Part One:
     case 'm':
         return c;
     case 'u':
@@ -155,7 +175,7 @@ char AddToken(char previous) {
         if (previous == 'l' || previous == 'o' || previous == 't') return c;
         break;
     case ')':
-        if (isdigit(previous) || previous == '(') return '.';
+        if (isdigit(previous) || previous == '(') return c;
         break;
     case ',':
         if (isdigit(previous) && isdigit(Peek())) return c;
@@ -168,7 +188,15 @@ char AddToken(char previous) {
     }
 
     // If we reach here, the character is invalid for the current token.
-    problemChar = c;  // Store the problematic character for debugging.
-    return '\0';      // Indicate failure.
+    g_problemChar = c;  // Store the problematic character for debugging if we need it.
+    return '\0';
+}
+
+//There is surely a better way of doing this... I'm sorry....
+//At least it works for the puzzle input.
+bool validateToken(std::string token){
+    if (token.at(0) == 'm'){ return true; }
+    if (token.at(0) == 'd'){ return true; }
+    return false;
 }
 

@@ -8,7 +8,7 @@ std::vector<std::string> collectXMASTokens(std::vector<std::vector<char>>& input
 std::vector<std::string> collectX_MASTokens(std::vector<std::vector<char>>& input);
 
 int main(){
-    std::fstream inFile("TestData//input.txt");
+    std::fstream inFile("TestData//04_input.txt");
     if (!inFile.is_open()){
         std::cout << "Error: Unable to open input file.\n";
     }
@@ -28,8 +28,8 @@ int main(){
     std::vector<std::string> tokens = collectXMASTokens(input);
     std::vector<std::string> masTokens = collectX_MASTokens(input);
 
-    std::cout << "Total Valid Part One Tokens: " << tokens.size() << std::endl;
-    std::cout << "Total Valid Part Two Tokens: " << masTokens.size() << std::endl;
+    std::cout << "Total Valid XMAS Tokens: " << tokens.size() << std::endl;
+    std::cout << "Total Valid X-MAS Tokens: " << masTokens.size() << std::endl;
 
     std::cin.get();
 
