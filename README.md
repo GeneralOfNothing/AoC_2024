@@ -22,10 +22,11 @@ To build and run the solutions, follow these steps:
    ```
 
 3. **Prepare Puzzle Input**  
-   Before running any solution, add your puzzle input to the `TestData` directory. Each day's solution expects an `input.txt` file in the following location:  
+   Before running any solution, add your puzzle input to the `TestData` directory. Each day's solution expects an `XX_input.txt` file in the following location:  
    ```
-   <BuildDirectory>/TestData/input.txt
+   <BuildDirectory>/TestData/XX_input.txt
    ```
+   XX should be replaced with the corresponding day. Day 5's input would be 05_input.txt for example.
 
 ## Notes
 
