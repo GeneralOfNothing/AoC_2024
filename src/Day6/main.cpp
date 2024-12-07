@@ -6,6 +6,7 @@
 
 std::vector<std::vector<char>> getInput(std::fstream& inFile);
 void printSurroundings(int i,int j, const std::vector<std::vector<char>>& input);
+bool runSim(std::vector<std::vector<char>>& input, int& distinctTiles);
 
 enum dir{
     UP,
@@ -19,126 +20,179 @@ int main(){
 
     std::vector<std::vector<char>> input = getInput(inFile);
 
-    dir currentDir = UP;
-    int distinctTiles = 1; //Init to one due to gaurd's starting tile.
-    bool isDone = false;
+    int guardCol = 0;
+    int guardRow = 0;
 
-    while (!isDone){
-        for (int i = 0; i < input.size(); i++){
-            for (int j = 0; j < input.size(); j++){
-                char current = input.at(i).at(j);
-                if (current == '^'){
-                    printSurroundings(i, j, input);
-                    char nextChar = '\0';
-                    switch(currentDir){
-                    case UP:
-                        //check char above
-                        nextChar = input.at(i-1).at(j);
-                        switch(nextChar){
-                        case '.':
-                            input.at(i-1).at(j) = current;
-                            input.at(i).at(j) = 'x';
-                            distinctTiles++;
-                            break;
-                        case 'x':
-                            input.at(i-1).at(j) = current;
-                            input.at(i).at(j) = 'x';
-                            break;
-                        case '#':
-                            currentDir = RIGHT;
-                            //input.at(i).at(j+1) = current;
-                            //input.at(i).at(j) = 'x';
-                            break;
-                        case '@':
-                            isDone = true;
-                            input.at(i).at(j) = 'x';
-                            break;
-                        }
-                        break;
-                    case LEFT:
-                        nextChar = input.at(i).at(j-1);
-                        switch (nextChar){
-                        case '.':
-                            input.at(i).at(j-1) = current;
-                            input.at(i).at(j) = 'x';
-                            distinctTiles++;
-                            break;
-                        case 'x':
-                            input.at(i).at(j-1) = current;
-                            input.at(i).at(j) = 'x';
-                            break;
-                        case '#':
-                            currentDir = UP;
-                            //input.at(i-1).at(j) = current;
-                            //input.at()
-                            break;
-                        case '@':
-                            isDone = true;
-                            input.at(i).at(j) = 'x';
-                            break;
-                        }
-                        break;
-                    case RIGHT:
-                        nextChar = input.at(i).at(j+1);
-                        switch (nextChar){
-                        case '.':
-                            input.at(i).at(j+1) = current;
-                            input.at(i).at(j) = 'x';
-                            distinctTiles++;
-                            break;
-                        case 'x':
-                            input.at(i).at(j+1) = current;
-                            input.at(i).at(j) = 'x';
-                            break;
-                        case '#':
-                            currentDir = DOWN;
-                            break;
-                        case '@':
-                            isDone = true;
-                            input.at(i).at(j) = 'x';
-                            break;
-                        }
-                        break;
-                    case DOWN:
-                        nextChar = input.at(i+1).at(j);
-                        switch (nextChar){
-                        case '.':
-                            input.at(i+1).at(j) = current;
-                            input.at(i).at(j) = 'x';
-                            distinctTiles++;
-                            break;
-                        case 'x':
-                            input.at(i+1).at(j) = current;
-                            input.at(i).at(j) = 'x';
-                            break;
-                        case '#':
-                            currentDir = LEFT;
-                            break;
-                        case '@':
-                            isDone = true;
-                            input.at(i).at(j) = 'x';
-                            break;
-                        break;
-                        }
-                        break;
-                    }
-                }
+    for (int i = 0; i < input.size(); i++){
+        for (int j = 0; j < input.size(); j++){
+            if (input.at(i).at(j) == '^'){
+                guardRow = i;
+                guardCol = j;
             }
         }
     }
 
-    //Output Display:
-    std::cout << "Day Six's Output:\n";
-    for (int i = 0; i < input.size(); i++){
-        for (int j = 0; j < input.at(i).size(); j++){
-            std::cout << input.at(i).at(j);
-        }
-        std::cout << std::endl;
-    }
+    int distinctTiles = 0;
+    int loops = 0;
 
+    bool infLoop = runSim(input, distinctTiles);
     std::cout << "Total Distinct Tiles: " << distinctTiles << std::endl;
 
+    std::vector<std::vector<char>> partOneCacheInput = input;
+
+    input.at(guardRow).at(guardCol) = '^';
+
+    //Part Two:
+    int simCounter = 0;
+    for (int i = 0; i < input.size(); i++){
+        for (int j = 0; j < input.size(); j++){
+            char currentChar = input.at(i).at(j);
+            if (currentChar == 'x'){
+                std::cout << "Running Sim #" << ++simCounter << std::endl;
+                input.at(i).at(j) = '#';
+                int tiles;
+                bool looping = runSim(input, tiles);
+                if (looping){
+                    loops++;
+                }
+                input = partOneCacheInput;
+                input.at(guardRow).at(guardCol) = '^';
+            }
+        }
+    }
+
+    std::cout << "Total Looping Locations: " << loops << std::endl;
+
     return 0;
+}
+
+bool runSim(std::vector<std::vector<char>>& input, int& distinctTiles){
+    dir currentDir = UP;
+    distinctTiles = 1; //Init to one due to gaurd's starting tile.
+    bool isDone = false;
+    int cycles = 0;
+
+    std::pair<int,int> guardPos;
+    for (int i = 0; i < input.size(); i++){
+        for (int j = 0; j < input.size(); j++){
+            if (input.at(i).at(j) == '^'){
+                guardPos = {i, j};
+            }
+        }
+    }
+
+    while (!isDone){
+        cycles++;
+
+        //Console Visualization:
+        //printSurroundings(guardPos.first, guardPos.second, input);
+
+        //Brute Force FTW!!!
+        if (cycles > 10000){
+            std::cout << "Loop Detected." << std::endl;
+            return true;
+        }
+
+        char current = input.at(guardPos.first).at(guardPos.second);
+        char nextChar = '\0';
+        switch(currentDir){
+        case UP:
+            //check char above
+            nextChar = input.at(guardPos.first-1).at(guardPos.second);
+            switch(nextChar){
+            case '.':
+                input.at(guardPos.first-1).at(guardPos.second) = current;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                guardPos = {guardPos.first - 1, guardPos.second};
+                distinctTiles++;
+                break;
+            case 'x':
+                input.at(guardPos.first-1).at(guardPos.second) = current;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                guardPos = {guardPos.first - 1, guardPos.second};
+                break;
+            case '#':
+                currentDir = RIGHT;
+                break;
+            case '@':
+                isDone = true;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                break;
+            }
+            break;
+        case LEFT:
+            nextChar = input.at(guardPos.first).at(guardPos.second-1);
+            switch (nextChar){
+            case '.':
+                input.at(guardPos.first).at(guardPos.second-1) = current;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                distinctTiles++;
+                guardPos = {guardPos.first, guardPos.second - 1};
+                break;
+            case 'x':
+                input.at(guardPos.first).at(guardPos.second-1) = current;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                guardPos = {guardPos.first, guardPos.second - 1};
+                break;
+            case '#':
+                currentDir = UP;
+                break;
+            case '@':
+                isDone = true;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                break;
+            }
+            break;
+        case RIGHT:
+            nextChar = input.at(guardPos.first).at(guardPos.second+1);
+            switch (nextChar){
+            case '.':
+                input.at(guardPos.first).at(guardPos.second+1) = current;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                distinctTiles++;
+                guardPos = {guardPos.first, guardPos.second + 1};
+                break;
+            case 'x':
+                input.at(guardPos.first).at(guardPos.second + 1 ) = current;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                guardPos = {guardPos.first, guardPos.second + 1};
+                break;
+            case '#':
+                currentDir = DOWN;
+                break;
+            case '@':
+                isDone = true;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                break;
+            }
+            break;
+        case DOWN:
+            nextChar = input.at(guardPos.first+1).at(guardPos.second);
+            switch (nextChar){
+            case '.':
+                input.at(guardPos.first+1).at(guardPos.second) = current;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                distinctTiles++;
+                guardPos = {guardPos.first + 1, guardPos.second};
+                break;
+            case 'x':
+                input.at(guardPos.first+1).at(guardPos.second) = current;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                guardPos = {guardPos.first + 1, guardPos.second};
+                break;
+            case '#':
+                currentDir = LEFT;
+                break;
+            case '@':
+                isDone = true;
+                input.at(guardPos.first).at(guardPos.second) = 'x';
+                break;
+            }
+            break;
+        }
+    }
+    std::cout << "No Loop Detected." << std::endl;
+    return false;
 }
 
 //Terminal Visualization
@@ -152,7 +206,7 @@ void printSurroundings(int i, int j, const std::vector<std::vector<char>>& input
     //Settings
     const int viewportWidth = 80;
     const int viewportHeight = 20;
-    const int speed = 50;
+    const int speed = 2500;
 
 
     int rows = input.size();
@@ -168,7 +222,7 @@ void printSurroundings(int i, int j, const std::vector<std::vector<char>>& input
         }
         std::cout << '\n';
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(speed));
+    std::this_thread::sleep_for(std::chrono::microseconds(speed));
 }
 
 //2D vector w/ padding (Lets avoid the try-catch monstrosity from day 4 lmao)
