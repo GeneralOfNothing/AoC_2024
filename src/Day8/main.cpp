@@ -93,6 +93,8 @@ int main(){
                     countedLocations.emplace(AntitennaLoc2);
                     validAntitennas++;
                 }
+
+                //For part two we will need to keep testing in each direction until we are out of bounds.
             }
         }
     }
