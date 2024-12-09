@@ -9,11 +9,12 @@ add_executable(DayThree src/Day3/main.cpp)
 add_executable(DayFour src/Day4/main.cpp)
 add_executable(DayFive src/Day5/main.cpp)
 add_executable(DaySix src/Day6/main.cpp)
+add_executable(DaySeven src/Day7/main.cpp)
 
 #Dummy Target
 add_custom_target(BuildAll)
 
-add_dependencies(BuildAll DayOne DayTwo DayThree DayFour DayFive DaySix)
+add_dependencies(BuildAll DayOne DayTwo DayThree DayFour DayFive DaySix DaySeven)
 
 #Create a TestData dir in the build location
 add_custom_command(TARGET BuildAll
